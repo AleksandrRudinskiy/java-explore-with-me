@@ -12,6 +12,7 @@
     <groupId>org.example</groupId>
     <artifactId>stats</artifactId>
     <packaging>pom</packaging>
+
     <modules>
         <module>client</module>
         <module>stats-dto</module>
@@ -23,5 +24,12 @@
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
