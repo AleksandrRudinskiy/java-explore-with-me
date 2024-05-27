@@ -7,6 +7,7 @@
         <groupId>org.example</groupId>
         <artifactId>stats</artifactId>
         <version>0.0.1-SNAPSHOT</version>
+        <relativePath>../stats-dto/pom.xml</relativePath>
     </parent>
 
     <artifactId>stats-dto</artifactId>
