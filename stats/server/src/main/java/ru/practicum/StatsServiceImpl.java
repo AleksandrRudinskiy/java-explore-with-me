@@ -41,9 +41,9 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public ResponseEntity<Object> getEventById(long id, HttpServletRequest request) {
-       EndpointHit endpointHit = statsRepository.findByUri(request.getRequestURI());
-       statsRepository.save(new EndpointHit(
-               0L, endpointHit.getApp(), request.getRequestURI(), endpointHit.getIp(), LocalDateTime.now() ));
+        EndpointHit endpointHit = statsRepository.findByUri(request.getRequestURI());
+        statsRepository.save(new EndpointHit(
+                0L, endpointHit.getApp(), request.getRequestURI(), endpointHit.getIp(), LocalDateTime.now()));
         System.out.println(endpointHit);
         return null;
     }

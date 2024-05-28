@@ -12,5 +12,5 @@ public interface StatsService {
 
     List<ViewStats> getStats(String start, String end);
 
-    ResponseEntity<Object> getEventById(long id,  HttpServletRequest request);
+    ResponseEntity<Object> getEventById(long id, HttpServletRequest request);
 }
