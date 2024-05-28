@@ -11,6 +11,7 @@
 
     <artifactId>stats-dto</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+    <name>ExploreWithMe-statsDto</name>
 
     <properties>
         <maven.compiler.source>11</maven.compiler.source>
