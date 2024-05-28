@@ -1,6 +1,6 @@
 package ru.practicum.endpoint;
 
-import endpoints.EndpointHitDto;
+import endpoint.EndpointHitDto;
 import lombok.experimental.UtilityClass;
 
 import java.time.LocalDateTime;
