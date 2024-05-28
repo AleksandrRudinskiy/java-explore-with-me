@@ -1,9 +1,8 @@
-package ru.practicum.endpoint;
+package ru.practicum;
 
 import endpoint.EndpointHitDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.viewstats.ViewStats;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;

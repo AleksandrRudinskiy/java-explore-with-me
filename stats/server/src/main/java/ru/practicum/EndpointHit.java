@@ -1,4 +1,4 @@
-package ru.practicum.endpoint;
+package ru.practicum;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
