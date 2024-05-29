@@ -1,9 +1,7 @@
 package ru.practicum;
 
 import endpoint.EndpointHitDto;
-import org.springframework.http.ResponseEntity;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface StatsService {
@@ -12,5 +10,4 @@ public interface StatsService {
 
     List<ViewStats> getStats(String start, String end, String uris, Boolean unique);
 
-    ResponseEntity<Object> getEventById(long id, HttpServletRequest request);
 }

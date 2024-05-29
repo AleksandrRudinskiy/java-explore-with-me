@@ -11,17 +11,16 @@ public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
 
     @Query(value = "select app, uri, count(*) as hits from endpoints " +
             "where uri like ?1 " +
+            "and time_stamp between ?2 and ?3 " +
             "group by uri " +
             "order by hits desc", nativeQuery = true)
-    List<ViewStats> getStats(String uri);
+    List<ViewStats> getStats(String uri, String startDate, String endDate);
 
     @Query(value = "select app, uri, count(distinct ip) as hits from endpoints " +
             "where uri like ?1 " +
+            "and time_stamp between ?2 and ?3 " +
             "group by uri " +
             "order by hits desc", nativeQuery = true)
-    List<ViewStats> getStatsUniqueIp(String uri);
-
-
-    EndpointHit findByUri(String uri);
+    List<ViewStats> getStatsUniqueIp(String uri, String startDate, String endDate);
 
 }
