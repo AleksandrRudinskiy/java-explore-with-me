@@ -10,10 +10,18 @@ import java.util.List;
 public interface StatsRepository extends JpaRepository<EndpointHit, Long> {
 
     @Query(value = "select app, uri, count(*) as hits from endpoints " +
-            "group by uri ", nativeQuery = true)
-    List<ViewStats> getStats();
+            "where uri like ?1 " +
+            "group by uri " +
+            "order by hits desc", nativeQuery = true)
+    List<ViewStats> getStats(String uri);
+
+    @Query(value = "select app, uri, count(distinct ip) as hits from endpoints " +
+            "where uri like ?1 " +
+            "group by uri " +
+            "order by hits desc", nativeQuery = true)
+    List<ViewStats> getStatsUniqueIp(String uri);
+
 
     EndpointHit findByUri(String uri);
-
 
 }

@@ -5,5 +5,5 @@ public interface ViewStats {
 
     String getUri();
 
-    String getHits();
+    Integer getHits();
 }

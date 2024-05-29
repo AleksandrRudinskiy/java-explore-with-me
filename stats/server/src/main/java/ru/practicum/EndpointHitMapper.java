@@ -16,7 +16,7 @@ public class EndpointHitMapper {
                 endpointHitDto.getApp(),
                 endpointHitDto.getUri(),
                 endpointHitDto.getIp(),
-                LocalDateTime.parse(endpointHitDto.getTimeStamp())
+                LocalDateTime.parse(endpointHitDto.getTimeStamp(), formatter)
         );
     }
 
