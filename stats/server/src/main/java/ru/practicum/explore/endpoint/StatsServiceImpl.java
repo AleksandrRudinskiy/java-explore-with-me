@@ -1,9 +1,12 @@
-package ru.practicum;
+package ru.practicum.explore.endpoint;
 
 import endpoint.EndpointHitDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.explore.common.NotCorrectDataException;
+import ru.practicum.explore.endpoint.model.EndpointHitMapper;
+import ru.practicum.explore.viewstats.ViewStats;
 
 import javax.transaction.Transactional;
 import java.net.URLDecoder;

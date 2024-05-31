@@ -1,4 +1,4 @@
-package ru.practicum;
+package ru.practicum.explore.endpoint.model;
 
 import endpoint.EndpointHitDto;
 import lombok.experimental.UtilityClass;

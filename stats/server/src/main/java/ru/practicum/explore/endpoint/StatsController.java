@@ -1,12 +1,14 @@
-package ru.practicum;
+package ru.practicum.explore.endpoint;
 
 import endpoint.EndpointHitDto;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.explore.viewstats.ViewStats;
 
-import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -18,15 +20,15 @@ public class StatsController {
 
     @PostMapping("/hit")
     @ResponseStatus(HttpStatus.CREATED)
-    public EndpointHitDto saveEndpointHit(@RequestBody EndpointHitDto endpointHitDto, HttpServletRequest request) {
+    public EndpointHitDto saveEndpointHit(@Valid @RequestBody EndpointHitDto endpointHitDto) {
         log.info("POST-create endpoint to stat : {}", endpointHitDto);
         return statsService.saveEndpointHit(endpointHitDto);
     }
 
     @GetMapping("/stats")
-    public List<ViewStats> getStats(@RequestParam(required = false) String start,
-                                    @RequestParam(required = false) String end,
-                                    @RequestParam(required = false, defaultValue = "%events%") String uris,
+    public List<ViewStats> getStats(@RequestParam @NonNull String start,
+                                    @RequestParam @NonNull String end,
+                                    @RequestParam(defaultValue = "%events%") @NonNull String uris,
                                     @RequestParam(required = false, defaultValue = "false") Boolean unique
     ) {
         log.info("GET stats with parameters: start = {}, end = {}, uris = {}, unique = {}",

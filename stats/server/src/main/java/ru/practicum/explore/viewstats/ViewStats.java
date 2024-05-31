@@ -1,4 +1,4 @@
-package ru.practicum;
+package ru.practicum.explore.viewstats;
 
 public interface ViewStats {
     String getApp();

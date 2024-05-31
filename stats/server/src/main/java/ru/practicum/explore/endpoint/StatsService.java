@@ -1,6 +1,7 @@
-package ru.practicum;
+package ru.practicum.explore.endpoint;
 
 import endpoint.EndpointHitDto;
+import ru.practicum.explore.viewstats.ViewStats;
 
 import java.util.List;
 
