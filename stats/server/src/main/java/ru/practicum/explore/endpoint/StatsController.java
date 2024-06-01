@@ -15,7 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class StatsController {
-
     private final StatsService statsService;
 
     @PostMapping("/hit")

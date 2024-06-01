@@ -24,15 +24,14 @@ services:
       - POSTGRES_PASSWORD=password
 
   main-service:
-    build: main-service
+    build: ./main-service/
     image: main-service
     container_name: main_service_container
     ports:
       - "8080:8080"
     depends_on:
       - main-service-db
-    environment:
-      - EXPLOREWITHME_main_service_URL=http://server:8080
+
 
   main-service-db:
     image: postgres:16.1-alpine
