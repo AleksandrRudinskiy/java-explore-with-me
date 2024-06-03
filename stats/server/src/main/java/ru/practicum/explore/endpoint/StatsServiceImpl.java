@@ -2,7 +2,6 @@ package ru.practicum.explore.endpoint;
 
 import endpoint.EndpointHitDto;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.common.NotCorrectDataException;
 import ru.practicum.explore.endpoint.model.EndpointHitMapper;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@Slf4j
 public class StatsServiceImpl implements StatsService {
     private final StatsRepository statsRepository;
     private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");

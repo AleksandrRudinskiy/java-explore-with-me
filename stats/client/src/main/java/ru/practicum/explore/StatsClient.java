@@ -1,4 +1,4 @@
-package ru.practicum;
+package ru.practicum.explore;
 
 import endpoint.EndpointHitDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +28,7 @@ public class StatsClient extends BaseClient {
         return post("/hit", endpointHitDto);
     }
 
-    public ResponseEntity<Object> getStats() {
-        return get("/stats");
+    public ResponseEntity<Object> getStats(String start, String end, String uris, Boolean unique) {
+        return get("/stats?start="+start+"&end="+end+"&uris="+uris+"&unique="+unique);
     }
 }
