@@ -29,6 +29,6 @@ public class StatsClient extends BaseClient {
     }
 
     public ResponseEntity<Object> getStats(String start, String end, String uris, Boolean unique) {
-        return get("/stats?start="+start+"&end="+end+"&uris="+uris+"&unique="+unique);
+        return get("/stats?start=" + start + "&end=" + end + "&uris=" + uris + "&unique=" + unique);
     }
 }
