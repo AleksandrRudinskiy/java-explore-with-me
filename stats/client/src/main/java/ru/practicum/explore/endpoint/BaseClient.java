@@ -1,4 +1,4 @@
-package ru.practicum.explore;
+package ru.practicum.explore.endpoint;
 
 import org.springframework.http.*;
 import org.springframework.lang.Nullable;

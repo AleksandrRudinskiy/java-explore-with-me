@@ -1,4 +1,4 @@
-package ru.practicum.explore;
+package ru.practicum.explore.endpoint;
 
 import endpoint.EndpointHitDto;
 import lombok.NonNull;

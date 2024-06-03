@@ -3,7 +3,7 @@ package ru.practicum.explore.event;
 import endpoint.EndpointHitDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.explore.StatsClient;
+import ru.practicum.explore.endpoint.StatsClient;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
