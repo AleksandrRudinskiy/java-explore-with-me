@@ -49,7 +49,6 @@ public class EventServiceImpl implements EventService {
     public List<Event> getEvents(
             String text, String categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable,
             String sort, int from, int size, HttpServletRequest request) {
-
         if (rangeStart != null && rangeEnd != null) {
             LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
             LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
@@ -57,8 +56,6 @@ public class EventServiceImpl implements EventService {
                 throw new IncorrectRequestException("Event must be published");
             }
         }
-
-
         EndpointHitDto endpointHitDto = new EndpointHitDto(
                 0L, "main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now().format(formatter));
         statsClient.saveEndpointHit(endpointHitDto);
@@ -78,7 +75,6 @@ public class EventServiceImpl implements EventService {
             return events.stream()
                     .sorted(Comparator.comparing(Event::getEventDate)).collect(Collectors.toList());
         }
-
         if (sort != null && sort.equals("VIEWS")) {
             return events.stream()
                     .sorted(Comparator.comparingInt(Event::getViews)).collect(Collectors.toList());
@@ -105,22 +101,18 @@ public class EventServiceImpl implements EventService {
         if (eventDto.getPaid() == null) {
             eventDto.setPaid(false);
         }
-
         if (eventDto.getParticipantLimit() == null) {
             eventDto.setParticipantLimit(0);
         }
-
         if (eventDto.getRequestModeration() == null) {
             eventDto.setRequestModeration(true);
         }
-
         Event event = eventRepository.save(
                 EventMapper.convertToEvent(eventDto, initiator, category, location));
 
         log.info("Added New event: {}", event);
         return event;
     }
-
 
     @Override
     public List<Event> searchEvents(String users, String states, String categories, String rangeStart, String rangeEnd, int from, int size) {
@@ -134,12 +126,7 @@ public class EventServiceImpl implements EventService {
         if (users == null && states == null && categories == null) {
             return eventRepository.findAll(page).toList();
         }
-
-        List<Event> events = eventRepository.searchEventsByAdmin(statesList, usersList, categoriesList, page);
-
-        //   events.forEach(e -> e.setConfirmedRequests(requestRepository.getRequestCount(e.getId())));
-
-        return events;
+        return eventRepository.searchEventsByAdmin(statesList, usersList, categoriesList, page);
     }
 
     @Override
