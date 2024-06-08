@@ -27,7 +27,7 @@ public class CompilationController {
 
     @GetMapping("/compilations/{compId}")
     public CompilationDto getEventCompilationById(@PathVariable Long compId) {
-        log.info("GET /compilations/ {}", compId);
+        log.info("GET /compilations/{}", compId);
         return compilationService.getEventCompilationById(compId);
     }
 
@@ -39,10 +39,9 @@ public class CompilationController {
     }
 
     @PatchMapping("/admin/compilations/{compId}")
-    public CompilationDto patchCompilation(@RequestBody @Valid CompilationDto compilationDto,
-                                           @PathVariable Long compId) {
-        log.info("PATCH /admin/compilations/ {}", compId);
-        log.info("PATCH /admin/compilations/ ОБНОВЛЯЕМЫЙ СПИСОК events ПОДБОРКИ {}", compilationDto.getEvents());
+    public CompilationFullDto patchCompilation(@RequestBody @Valid CompilationDto compilationDto,
+                                               @PathVariable Long compId) {
+        log.info("PATCH /admin/compilations/{} with body: {}", compId, compilationDto);
         return compilationService.patchCompilation(compilationDto, compId);
     }
 

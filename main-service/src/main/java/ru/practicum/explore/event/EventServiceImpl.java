@@ -136,7 +136,6 @@ public class EventServiceImpl implements EventService {
         String[] arrayStr = Objects.requireNonNull(response.getBody()).toString().split("=");
         String[] arrayNext = arrayStr[1].split(",");
         int hits = Integer.parseInt(arrayNext[0]);
-
         event.setViews(hits);
         return eventRepository.save(event);
     }

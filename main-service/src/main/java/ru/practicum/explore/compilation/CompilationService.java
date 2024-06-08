@@ -12,7 +12,7 @@ public interface CompilationService {
 
     CompilationFullDto addCompilation(CompilationDto compilationDto);
 
-    CompilationDto patchCompilation(CompilationDto compilationDto, long compId);
+    CompilationFullDto patchCompilation(CompilationDto compilationDto, long compId);
 
     void deleteCompilationById(long compId);
 
