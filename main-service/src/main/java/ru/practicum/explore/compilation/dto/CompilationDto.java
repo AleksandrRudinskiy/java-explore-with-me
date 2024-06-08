@@ -19,5 +19,5 @@ public class CompilationDto {
     @NotBlank
     @Length(max = 50)
     private String title;
-    List<Long> events;
+    private List<Long> events;
 }
