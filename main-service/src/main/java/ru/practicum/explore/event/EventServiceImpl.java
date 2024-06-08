@@ -70,8 +70,10 @@ public class EventServiceImpl implements EventService {
             events = events.stream()
                     .filter(event -> event.getAnnotation().contains(text) || event.getDescription().contains(text)).collect(Collectors.toList());
         }
-
-
+        if (paid != null && paid) {
+            events = events.stream()
+                    .filter(Event::getPaid).collect(Collectors.toList());
+        }
         if (sort != null && sort.equals("EVENT_DATE")) {
             return events.stream()
                     .sorted(Comparator.comparing(Event::getEventDate)).collect(Collectors.toList());
