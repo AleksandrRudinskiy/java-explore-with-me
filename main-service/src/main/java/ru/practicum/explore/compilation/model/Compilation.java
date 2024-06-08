@@ -1,4 +1,4 @@
-package ru.practicum.explore.user;
+package ru.practicum.explore.compilation.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,15 +6,15 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@Data
 @Entity
-@Table(name = "users", schema = "public")
+@Table(name = "compilations", schema = "public")
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String email;
-    private String name;
+    private Boolean pinned;
+    private String title;
 }

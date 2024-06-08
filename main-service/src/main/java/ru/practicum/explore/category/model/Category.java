@@ -1,4 +1,4 @@
-package ru.practicum.explore.category;
+package ru.practicum.explore.category.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,5 +15,6 @@ public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
+    @Column(name = "name")
     private String name;
 }

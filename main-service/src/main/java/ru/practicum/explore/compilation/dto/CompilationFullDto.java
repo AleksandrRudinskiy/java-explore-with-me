@@ -1,26 +1,21 @@
-package ru.practicum.explore.user.dto;
+package ru.practicum.explore.compilation.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.Length;
+import ru.practicum.explore.event.model.Event;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDto {
+public class CompilationFullDto {
     private long id;
-    @NotNull
-    @NotBlank
-    @Length(min = 6, max = 254)
-    private String email;
-    @NotNull
-    @NotBlank
-    @Size(min = 2)
-    @Size(max = 250)
-    private String name;
+    private Boolean pinned;
+    private String title;
+    List<Event> events;
 }

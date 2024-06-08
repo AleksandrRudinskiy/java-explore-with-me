@@ -1,4 +1,4 @@
-package ru.practicum.explore.event;
+package ru.practicum.explore.user.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,15 +6,15 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-@Entity
-@Table(name = "events", schema = "public")
 @Data
+@Entity
+@Table(name = "users", schema = "public")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Event {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String annotation;
-
+    private String email;
+    private String name;
 }
