@@ -144,9 +144,12 @@ public class EventServiceImpl implements EventService {
         ResponseEntity<Object> response = statsClient.getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
 
         log.info(" response = {}", response.getBody());
+String str = Objects.requireNonNull(response.getBody()).toString();
+        int index = str.indexOf("hits");
+        String subString = str.substring(index);
 
-        String[] arrayStr = Objects.requireNonNull(response.getBody()).toString().split("=");
-        String[] arrayNext = arrayStr[1].split(",");
+        String[] arrayStr = subString.split("=");
+        String[] arrayNext = arrayStr[1].split("[,}]");
         int hits = Integer.parseInt(arrayNext[0]);
         event.setViews(hits);
         return eventRepository.save(event);
