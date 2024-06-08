@@ -11,7 +11,9 @@ import java.io.IOException;
 import java.util.List;
 
 public interface EventService {
-    List<Event> getEvents(HttpServletRequest request, String rangeStart, String rangeEnd, int from, int size);
+    List<Event> getEvents(
+            String text, String categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable,
+            String sort, int from, int size, HttpServletRequest request);
 
     Event addEvent(long userId, EventDto eventDto);
 

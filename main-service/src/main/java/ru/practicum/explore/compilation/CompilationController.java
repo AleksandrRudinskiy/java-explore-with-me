@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.compilation.dto.CompilationDto;
 import ru.practicum.explore.compilation.dto.CompilationFullDto;
+import ru.practicum.explore.compilation.dto.UpdateCompilationRequest;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -26,7 +27,7 @@ public class CompilationController {
     }
 
     @GetMapping("/compilations/{compId}")
-    public CompilationDto getEventCompilationById(@PathVariable Long compId) {
+    public CompilationFullDto getEventCompilationById(@PathVariable Long compId) {
         log.info("GET /compilations/{}", compId);
         return compilationService.getEventCompilationById(compId);
     }
@@ -39,7 +40,7 @@ public class CompilationController {
     }
 
     @PatchMapping("/admin/compilations/{compId}")
-    public CompilationFullDto patchCompilation(@RequestBody @Valid CompilationDto compilationDto,
+    public CompilationFullDto patchCompilation(@RequestBody @Valid UpdateCompilationRequest compilationDto,
                                                @PathVariable Long compId) {
         log.info("PATCH /admin/compilations/{} with body: {}", compId, compilationDto);
         return compilationService.patchCompilation(compilationDto, compId);

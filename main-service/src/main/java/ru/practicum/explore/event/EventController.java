@@ -33,7 +33,7 @@ public class EventController {
                                  @RequestParam(defaultValue = "10") int size,
                                  HttpServletRequest request) {
         log.info("GET-request to find all events with start {} and end {}", rangeStart, rangeEnd);
-        return eventService.getEvents(request, rangeStart, rangeEnd, from, size);
+        return eventService.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
     }
 
     @GetMapping("/events/{eventId}")

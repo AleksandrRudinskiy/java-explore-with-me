@@ -46,7 +46,10 @@ public class EventServiceImpl implements EventService {
 
 
     @Override
-    public List<Event> getEvents(HttpServletRequest request, String rangeStart, String rangeEnd, int from, int size) {
+    public List<Event> getEvents(
+            String text, String categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable,
+            String sort, int from, int size, HttpServletRequest request) {
+
         if (rangeStart != null && rangeEnd != null) {
             LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
             LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
@@ -54,11 +57,31 @@ public class EventServiceImpl implements EventService {
                 throw new IncorrectRequestException("Event must be published");
             }
         }
+
+
         EndpointHitDto endpointHitDto = new EndpointHitDto(
                 0L, "main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now().format(formatter));
         statsClient.saveEndpointHit(endpointHitDto);
         PageRequest page = checkPageableParameters(from, size);
-        return eventRepository.findAll(page).toList().stream().sorted(Comparator.comparingInt(Event::getViews)).collect(Collectors.toList());
+
+        List<Event> events = eventRepository.findAll();
+
+        if (text != null) {
+            events = events.stream()
+                    .filter(event -> event.getAnnotation().contains(text) || event.getDescription().contains(text)).collect(Collectors.toList());
+        }
+
+
+        if (sort != null && sort.equals("EVENT_DATE")) {
+            return events.stream()
+                    .sorted(Comparator.comparing(Event::getEventDate)).collect(Collectors.toList());
+        }
+
+        if (sort != null && sort.equals("VIEWS")) {
+            return events.stream()
+                    .sorted(Comparator.comparingInt(Event::getViews)).collect(Collectors.toList());
+        }
+        return events.stream().limit(size).collect(Collectors.toList());
     }
 
     @Override

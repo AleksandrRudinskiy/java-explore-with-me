@@ -8,6 +8,7 @@ import ru.practicum.explore.common.NotFoundException;
 import ru.practicum.explore.compilation.dto.CompilationDto;
 import ru.practicum.explore.compilation.dto.CompilationFullDto;
 import ru.practicum.explore.compilation.dto.CompilationMapper;
+import ru.practicum.explore.compilation.dto.UpdateCompilationRequest;
 import ru.practicum.explore.compilation.model.Compilation;
 import ru.practicum.explore.compilation.model.CompilationEventInfo;
 import ru.practicum.explore.compilation.model.CompilationsEvents;
@@ -44,7 +45,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public CompilationDto getEventCompilationById(Long compId) {
+    public CompilationFullDto getEventCompilationById(Long compId) {
         if (!compilationRepository.existsById(compId)) {
             throw new NotFoundException("Подборка не найдена");
         } else {
@@ -54,7 +55,15 @@ public class CompilationServiceImpl implements CompilationService {
                     .map(CompilationEventInfo::getEventId)
                     .collect(Collectors.toList());
             log.info("eventsIds = {}", eventsIds);
-            return CompilationMapper.convertToCompilationDto(compilation, eventsIds);
+            CompilationDto compilationDto = CompilationMapper.convertToCompilationDto(compilation, eventsIds);
+            List<Event> events = new ArrayList<>();
+
+            for (Long eventId : eventsIds) {
+                Event event = eventRepository.findEventById(eventId);
+                events.add(event);
+            }
+
+            return CompilationMapper.convertToFullDto(compilationDto, events);
         }
     }
 
@@ -96,7 +105,7 @@ public class CompilationServiceImpl implements CompilationService {
 
 
     @Override
-    public CompilationFullDto patchCompilation(CompilationDto compilationDto, long compId) {
+    public CompilationFullDto patchCompilation(UpdateCompilationRequest compilationDto, long compId) {
 
 
         Compilation compilation = compilationRepository.findById(compId).get();
@@ -112,6 +121,13 @@ public class CompilationServiceImpl implements CompilationService {
         List<Long> eventsIds = new ArrayList<>();
         List<Event> events = new ArrayList<>();
         if (compilationDto.getEvents() != null) {
+            for (Long eventsId : compilationDto.getEvents()) {
+                compilationEventsRepository.save(new CompilationsEvents(0L, compilation.getId(), eventsId));
+                Event event = eventRepository.findEventById(eventsId);
+                events.add(event);
+            }
+
+
             eventsIds = compilationDto.getEvents();
 
             for (Long eventId : eventsIds) {
