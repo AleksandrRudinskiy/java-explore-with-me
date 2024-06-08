@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.event.dto.EventDto;
 import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
+import ru.practicum.explore.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.participation_request.ParticipationRequest;
 
@@ -46,7 +47,7 @@ public class EventController {
     @ResponseStatus(HttpStatus.CREATED)
     public Event addEvent(@PathVariable long userId,
                           @RequestBody @Valid EventDto eventDto) {
-        log.info("POST to add new event : {} from userId: {}", eventDto, userId);
+        log.info("POST /users/{}/events with body : {}", userId, eventDto);
         return eventService.addEvent(userId, eventDto);
     }
 
@@ -61,16 +62,16 @@ public class EventController {
     @PatchMapping("/admin/events/{eventId}")
     public Event patchEvent(@PathVariable long eventId,
                             @RequestBody @Valid UpdateEventAdminRequest eventDto) {
-        log.info("PATCH event with id {} body {}", eventId, eventDto);
+        log.info("PATCH /admin/events/{} with body: {}", eventId, eventDto);
         return eventService.patchEvent(eventId, eventDto);
     }
 
     @PatchMapping("/users/{userId}/events/{eventId}")
-    public Event patchEventByUser(@PathVariable long userId,
-                                  @PathVariable long eventId,
-                                  @RequestBody @Valid UpdateEventAdminRequest eventDto) {
+    public Event patchEventByCurrentUser(@PathVariable long userId,
+                                         @PathVariable long eventId,
+                                         @RequestBody @Valid UpdateEventUserRequest eventDto) {
         log.info("PATCH event by current user {} with id {} body {}", userId, eventId, eventDto);
-        return eventService.patchEvent(eventId, eventDto);
+        return eventService.patchEventByUser(userId, eventId, eventDto);
     }
 
     @GetMapping("/admin/events")

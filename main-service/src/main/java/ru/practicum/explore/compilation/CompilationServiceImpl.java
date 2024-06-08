@@ -1,8 +1,10 @@
 package ru.practicum.explore.compilation;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import ru.practicum.explore.common.NotFoundException;
 import ru.practicum.explore.compilation.dto.CompilationDto;
 import ru.practicum.explore.compilation.dto.CompilationFullDto;
 import ru.practicum.explore.compilation.dto.CompilationMapper;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final CompilationEventsRepository compilationEventsRepository;
@@ -50,17 +53,16 @@ public class CompilationServiceImpl implements CompilationService {
 
     @Override
     public CompilationDto getEventCompilationById(Long compId) {
-        Compilation compilation = null;
-        if (compilationRepository.findById(compId).isPresent()) {
-            compilation = compilationRepository.findById(compId).get();
-        }
+        Compilation compilation = compilationRepository.findById(compId).get();
+
+        log.info("ПОДОРКА СОБЫТИЙ по compId {}:   {}", compId, compilation);
+
 
         List<Long> eventsIds = compilationEventsRepository.findCompilationEventsByCompilationId(compId).stream()
                 .map(CompilationEventInfo::getEventId)
                 .collect(Collectors.toList());
 
 
-        assert compilation != null;
         return CompilationMapper.convertToCompilationDto(compilation, eventsIds);
     }
 
@@ -94,26 +96,33 @@ public class CompilationServiceImpl implements CompilationService {
             compilationDto.setEvents(new ArrayList<>());
         }
 
+        CompilationFullDto compilationFullDto = CompilationMapper.convertToFullDto(compilationDto, events);
 
-        return CompilationMapper.convertToFullDto(compilationDto, events);
+        log.info("Added compilation full dto: {}", compilationFullDto);
+        return compilationFullDto;
     }
 
 
     @Override
     public CompilationDto patchCompilation(CompilationDto compilationDto, long compId) {
+
+
         Compilation compilation = compilationRepository.findById(compId).get();
-
-
         if (compilationDto.getTitle() != null) {
             compilation.setTitle(compilationDto.getTitle());
         }
-
         if (compilationDto.getPinned() != null) {
             compilation.setPinned(compilationDto.getPinned());
         }
-
         Compilation patchedCompilation = compilationRepository.save(compilation);
-
         return CompilationMapper.convertToCompilationDto(patchedCompilation, compilationDto.getEvents());
+    }
+
+    @Override
+    public void deleteCompilationById(long compId) {
+        if (!compilationRepository.existsById(compId)) {
+            throw new NotFoundException("Compilation with id " + compId + " not found.");
+        }
+        compilationRepository.deleteById(compId);
     }
 }

@@ -21,4 +21,10 @@ public interface UserService {
 
     EventRequestStatusUpdateResult patchRequestStatus(long userId, long eventId, EventRequestStatusUpdateRequest request);
 
+    List<ParticipationRequest> getUsersRequests(long userId);
+
+    List<ParticipationRequest> getCurrentUsersRequests(long userId, long eventId);
+
+    ParticipationRequest canceledRequest(long userId, long requestId);
+
 }

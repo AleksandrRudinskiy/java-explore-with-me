@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
@@ -51,4 +52,29 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+    public ResponseEntity<Map<String, String>> handleSQLIntegrityConstraintViolationException(
+            final SQLIntegrityConstraintViolationException e) {
+        log.error("409 Нарушение уникального индекса");
+        return new ResponseEntity<>(
+                Map.of("status", "CONFLICT",
+                        "reason", "Incorrectly made request.",
+                        "message", e.getMessage(),
+                        "timestamp", LocalDateTime.now().format(formatter)),
+                HttpStatus.CONFLICT
+        );
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<Map<String, String>> handleConflictException(
+            final ConflictException e) {
+        log.error("409 Нарушение уникального индекса");
+        return new ResponseEntity<>(
+                Map.of("status", "CONFLICT",
+                        "reason", "Incorrectly made request.",
+                        "message", e.getMessage(),
+                        "timestamp", LocalDateTime.now().format(formatter)),
+                HttpStatus.CONFLICT
+        );
+    }
 }

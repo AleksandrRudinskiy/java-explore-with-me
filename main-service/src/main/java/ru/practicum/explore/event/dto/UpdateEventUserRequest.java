@@ -9,14 +9,12 @@ import ru.practicum.explore.location.LocationDto;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UpdateEventAdminRequest {
+public class UpdateEventUserRequest {
     @Size(min = 20, message = "{validation.annotation.size.too_short}")
     @Size(max = 2000, message = "{validation.annotation.size.too_long}")
-
     private String annotation;
     @JsonProperty("category")
     private Long categoryId;
@@ -34,5 +32,4 @@ public class UpdateEventAdminRequest {
     @Size(min = 3, message = "{validation.title.size.too_short}")
     @Size(max = 120, message = "{validation.title.size.too_long}")
     private String title;
-
 }

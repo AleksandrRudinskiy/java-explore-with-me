@@ -46,4 +46,13 @@ public class CompilationController {
         return compilationService.patchCompilation(compilationDto, compId);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/admin/compilations/{compId}")
+    public void deleteCompilationById(@PathVariable long compId) {
+        log.info("DELETE /admin/compilations/{}", compId);
+        compilationService.deleteCompilationById(compId);
+
+    }
+
+
 }

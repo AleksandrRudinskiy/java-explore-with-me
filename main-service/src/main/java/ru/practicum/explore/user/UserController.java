@@ -34,21 +34,11 @@ public class UserController {
         return userService.getUsersByIds(ids, from, size);
     }
 
-    @DeleteMapping("/admin/users/{userId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUserById(@PathVariable long userId) {
-        log.info("DELETE user with id {}", userId);
-        userService.deleteUserById(userId);
-    }
-
     @PostMapping("/users/{userId}/requests")
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequest addParticipationRequest(@PathVariable long userId,
                                                         @RequestParam(defaultValue = "0") Long eventId) {
-        log.info("POST add new participation request from userId {} to eventId {}",
-                userId, eventId);
-
-
+        log.info("POST add new participation request from userId {} to eventId {}", userId, eventId);
         return userService.addParticipationRequest(userId, eventId);
     }
 
@@ -66,6 +56,33 @@ public class UserController {
                                                              @RequestBody EventRequestStatusUpdateRequest request) {
         log.info("PATCH /users/{}/events/{}/requests with body {}", userId, eventId, request);
         return userService.patchRequestStatus(userId, eventId, request);
+    }
+
+    @GetMapping("/users/{userId}/requests")
+    public List<ParticipationRequest> getUsersRequests(@PathVariable long userId) {
+        log.info("GET /users/{}/requests", userId);
+        return userService.getUsersRequests(userId);
+    }
+
+    @GetMapping("/users/{userId}/events/{eventId}/requests")
+    public List<ParticipationRequest> getCurrentUsersRequests(@PathVariable long userId,
+                                                              @PathVariable long eventId) {
+        log.info("GET /users/{}/events/{}/requests", userId, eventId);
+        return userService.getCurrentUsersRequests(userId, eventId);
+    }
+
+    @PatchMapping("/users/{userId}/requests/{requestId}/cancel")
+    public ParticipationRequest canceledRequest(@PathVariable long userId,
+                                                @PathVariable long requestId) {
+        log.info("PATCH /users/{}/requests/{}/cancel", userId, requestId);
+        return userService.canceledRequest(userId, requestId);
+    }
+
+    @DeleteMapping("/admin/users/{userId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUserById(@PathVariable long userId) {
+        log.info("DELETE user with id {}", userId);
+        userService.deleteUserById(userId);
     }
 
 }
