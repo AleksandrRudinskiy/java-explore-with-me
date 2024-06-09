@@ -128,6 +128,14 @@ public class EventServiceImpl implements EventService {
         }
         events.addAll(eventRepository.searchEventsByAdmin(statesList, usersList, categoriesList, page));
         log.info("searched events =  {}", events);
+
+        if (rangeStart != null && rangeEnd != null) {
+            LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
+            LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
+            return events.stream().filter(e -> LocalDateTime.parse(e.getEventDate(), formatter).isAfter(start)
+                    && LocalDateTime.parse(e.getEventDate(), formatter).isBefore(end)).collect(Collectors.toList());
+        }
+        log.info("searched events =  {}", events);
         return events;
     }
 
