@@ -21,7 +21,6 @@ public class UpdateEventUserRequest {
     @Size(max = 7000, message = "{validation.description.size.too_long}")
     @Size(min = 20, message = "{validation.description.size.too_short}")
     private String description;
-
     private String eventDate;
     private LocationDto location;
     private Boolean paid;

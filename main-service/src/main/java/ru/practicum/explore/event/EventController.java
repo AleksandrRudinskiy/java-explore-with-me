@@ -55,22 +55,6 @@ public class EventController {
         return eventService.getEventInfo(eventId);
     }
 
-
-    @PatchMapping("/admin/events/{eventId}")
-    public Event patchEvent(@PathVariable long eventId,
-                            @RequestBody @Valid UpdateEventAdminRequest eventDto) {
-        log.info("PATCH /admin/events/{} with body: {}", eventId, eventDto);
-        return eventService.patchEvent(eventId, eventDto);
-    }
-
-    @PatchMapping("/users/{userId}/events/{eventId}")
-    public Event patchEventByCurrentUser(@PathVariable long userId,
-                                         @PathVariable long eventId,
-                                         @RequestBody @Valid UpdateEventUserRequest eventDto) {
-        log.info("PATCH event by current user {} with id {} body {}", userId, eventId, eventDto);
-        return eventService.patchEventByUser(userId, eventId, eventDto);
-    }
-
     @GetMapping("/admin/events")
     public List<Event> searchEvents(@RequestParam(required = false) String users,
                                     @RequestParam(required = false) String states,
@@ -79,9 +63,26 @@ public class EventController {
                                     @RequestParam(required = false) String rangeEnd,
                                     @RequestParam(defaultValue = "0") int from,
                                     @RequestParam(defaultValue = "10") int size) {
-        log.info("GET/admin/events users {}, states {},  categories {}, from {}, size {} ",
-                users, states, categories, from, size);
+        log.info("GET/admin/events with params: " +
+                        "users {}, states {},  categories {}, rangeStart {}, rangeEnd {}, from {}, size {} ",
+                users, states, categories, rangeStart, rangeEnd, from, size);
         return eventService.searchEvents(users, states, categories, rangeStart, rangeEnd, from, size);
+    }
+
+    @PatchMapping("/admin/events/{eventId}")
+    public Event patchEvent(@PathVariable long eventId,
+                            @RequestBody @Valid UpdateEventAdminRequest eventDto) {
+        log.info("PATCH /admin/events/{} with body: {}", eventId, eventDto);
+        return eventService.patchEvent(eventId, eventDto);
+    }
+
+
+    @PatchMapping("/users/{userId}/events/{eventId}")
+    public Event patchEventByCurrentUser(@PathVariable long userId,
+                                         @PathVariable long eventId,
+                                         @RequestBody @Valid UpdateEventUserRequest eventDto) {
+        log.info("PATCH event by current user {} with id {} body {}", userId, eventId, eventDto);
+        return eventService.patchEventByUser(userId, eventId, eventDto);
     }
 
     @GetMapping("/users/{userId}/events")
