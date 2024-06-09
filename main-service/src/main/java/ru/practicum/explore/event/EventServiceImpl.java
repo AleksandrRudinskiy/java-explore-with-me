@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.explore.category.CategoryRepository;
 import ru.practicum.explore.category.model.Category;
 import ru.practicum.explore.common.*;
+import ru.practicum.explore.endpoint.StatsClient;
 import ru.practicum.explore.event.dto.EventDto;
 import ru.practicum.explore.event.dto.EventMapper;
 import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
@@ -44,6 +45,8 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
     private final StatsRepository statsRepository;
+
+    private final StatsClient  statsClient;
 
 
     @Override
@@ -259,6 +262,7 @@ public class EventServiceImpl implements EventService {
         EndpointHit endpointHit = EndpointHitMapper.convertDtoToEndpointHit(endpointHitDto);
 
         statsRepository.save(endpointHit);
+        statsClient.saveEndpointHit(endpointHitDto);
     }
 
     private void checkExists(long eventId) {
