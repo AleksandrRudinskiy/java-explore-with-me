@@ -140,15 +140,6 @@ public class EventServiceImpl implements EventService {
         return eventRepository.save(event);
     }
 
-    private int getViews(String data) {
-        int index = data.indexOf("hits");
-        String subString = data.substring(index);
-
-        String[] arrayStr = subString.split("=");
-        String[] arrayNext = arrayStr[1].split("[,}]");
-        return Integer.parseInt(arrayNext[0]);
-    }
-
     @Override
     public Event patchEvent(long eventId, UpdateEventAdminRequest eventRequest) {
         Event oldEvent = eventRepository.findEventById(eventId);
@@ -293,19 +284,7 @@ public class EventServiceImpl implements EventService {
         }
     }
 
-    public EndpointHitDto saveEndpointHit(EndpointHitDto endpointHitDto) {
-
-        endpointHitDto.setTimeStamp(LocalDateTime.now().toString());
-        return EndpointHitMapper.convertToEndpointHitDto(
-                statsRepository.save(EndpointHitMapper.convertDtoToEndpointHit(endpointHitDto)));
-    }
-
     public List<ViewStats> getStats(String start, String end, String uris, Boolean unique) {
-
-        log.info("STATS method getStats !!!!!!");
-        log.info("start = {}, end = {}, uris = {}, unique = {}", start, end, uris, unique);
-
-
         if (start == null || end == null) {
             throw new NotCorrectDataException("Даты не заданы!");
         }
