@@ -4,7 +4,6 @@ import endpoint.EndpointHitDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.category.CategoryRepository;
 import ru.practicum.explore.category.model.Category;
@@ -15,20 +14,26 @@ import ru.practicum.explore.event.dto.EventMapper;
 import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
 import ru.practicum.explore.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.event.model.Event;
+import ru.practicum.explore.event.stats.EndpointHit;
+import ru.practicum.explore.event.stats.EndpointHitMapper;
+import ru.practicum.explore.event.stats.StatsRepository;
 import ru.practicum.explore.location.Location;
 import ru.practicum.explore.location.LocationRepository;
 import ru.practicum.explore.participation_request.ParticipationRequestRepository;
 import ru.practicum.explore.user.UserRepository;
 import ru.practicum.explore.user.model.User;
+import viewstats.ViewStats;
 
 import javax.servlet.http.HttpServletRequest;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,6 +48,8 @@ public class EventServiceImpl implements EventService {
     private final ParticipationRequestRepository requestRepository;
     private final StatsClient statsClient;
 
+    private final StatsRepository statsRepository;
+
 
     @Override
     public List<Event> getEvents(
@@ -55,9 +62,9 @@ public class EventServiceImpl implements EventService {
                 throw new IncorrectRequestException("Event must be published");
             }
         }
-        EndpointHitDto endpointHitDto = new EndpointHitDto(
-                0L, "main-service", request.getRequestURI(), request.getRemoteAddr(), LocalDateTime.now().format(formatter));
-        statsClient.saveEndpointHit(endpointHitDto);
+
+        saveStats(request);
+
         PageRequest page = checkPageableParameters(from, size);
 
         List<Event> events = eventRepository.findAll();
@@ -134,12 +141,23 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event getEventById(long eventId, HttpServletRequest request) {
         checkExists(eventId);
+
         saveStats(request);
+
         Event event = eventRepository.findEventById(eventId);
-        ResponseEntity<Object> response = statsClient.getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
-        log.info(" response = {}", response.getBody());
-        String data = Objects.requireNonNull(response.getBody()).toString();
-        int views = getViews(data);
+
+        //ResponseEntity<Object> response = statsClient.getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
+
+        //log.info(" response = {}", response.getBody());
+
+
+        //String data = Objects.requireNonNull(response.getBody()).toString();
+
+        List<ViewStats> stats = getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
+
+        // int views = getViews(data);
+
+        int views = stats.get(0).getHits();
         event.setViews(views);
         return eventRepository.save(event);
     }
@@ -247,7 +265,9 @@ public class EventServiceImpl implements EventService {
                 request.getRequestURI(),
                 request.getRemoteAddr(),
                 LocalDateTime.now().format(formatter));
-        statsClient.saveEndpointHit(endpointHitDto);
+        EndpointHit endpointHit = EndpointHitMapper.convertDtoToEndpointHit(endpointHitDto);
+
+        statsRepository.save(endpointHit);
     }
 
     private void checkExists(long eventId) {
@@ -294,4 +314,49 @@ public class EventServiceImpl implements EventService {
             oldEvent.setTitle(updateEventRequest.getTitle());
         }
     }
+
+    public EndpointHitDto saveEndpointHit(EndpointHitDto endpointHitDto) {
+
+        endpointHitDto.setTimeStamp(LocalDateTime.now().toString());
+        return EndpointHitMapper.convertToEndpointHitDto(
+                statsRepository.save(EndpointHitMapper.convertDtoToEndpointHit(endpointHitDto)));
+    }
+
+    public List<ViewStats> getStats(String start, String end, String uris, Boolean unique) {
+
+        log.info("STATS method getStats !!!!!!");
+        log.info("start = {}, end = {}, uris = {}, unique = {}", start, end, uris, unique);
+
+
+        if (start == null || end == null) {
+            throw new NotCorrectDataException("Даты не заданы!");
+        }
+        LocalDateTime startDate = LocalDateTime.parse(start, formatter);
+        LocalDateTime endDate = LocalDateTime.parse(end, formatter);
+        if (endDate.isBefore(startDate)) {
+            throw new NotCorrectDataException("Неверно заданы даты!");
+        }
+
+        if (uris.equals("%events%")) {
+            return statsRepository.getStats(uris, start, end);
+        }
+
+        String decodeUris = URLDecoder.decode(uris, StandardCharsets.UTF_8);
+        String[] arrayUris = decodeUris.split(",");
+
+        if (unique) {
+            List<ViewStats> stats = new ArrayList<>();
+            Arrays.stream(arrayUris).forEach(s -> stats.addAll(statsRepository.getStatsUniqueIp(s, start, end)));
+            return stats.stream()
+                    .sorted(Comparator.comparingInt(ViewStats::getHits).reversed())
+                    .collect(Collectors.toList());
+        } else {
+            List<ViewStats> stats = new ArrayList<>();
+            Arrays.stream(arrayUris).forEach(s -> stats.addAll(statsRepository.getStats(s, start, end)));
+            return stats.stream()
+                    .sorted(Comparator.comparingInt(ViewStats::getHits).reversed())
+                    .collect(Collectors.toList());
+        }
+    }
+
 }
