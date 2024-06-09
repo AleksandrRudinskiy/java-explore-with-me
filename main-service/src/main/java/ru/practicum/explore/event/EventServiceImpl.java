@@ -136,12 +136,9 @@ public class EventServiceImpl implements EventService {
         checkExists(eventId);
         saveStats(request);
         Event event = eventRepository.findEventById(eventId);
-
         ResponseEntity<Object> response = statsClient.getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
-
         log.info(" response = {}", response.getBody());
-      //  String data = Objects.requireNonNull(response.getBody()).toString();
-        String data ="";
+        String data = Objects.requireNonNull(response.getBody()).toString();
         int views = getViews(data);
         event.setViews(views);
         return eventRepository.save(event);
