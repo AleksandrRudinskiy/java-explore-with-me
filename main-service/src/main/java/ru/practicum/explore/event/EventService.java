@@ -4,7 +4,6 @@ import ru.practicum.explore.event.dto.EventDto;
 import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
 import ru.practicum.explore.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.event.model.Event;
-import ru.practicum.explore.participation_request.ParticipationRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -27,6 +26,6 @@ public interface EventService {
 
     Event patchEventByUser(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest);
 
-    List<ParticipationRequest> getAllRequests();
+    List<Event> getUserEvents(long userId, int from, int size);
 
 }

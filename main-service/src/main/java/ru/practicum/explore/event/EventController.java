@@ -8,7 +8,6 @@ import ru.practicum.explore.event.dto.EventDto;
 import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
 import ru.practicum.explore.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.event.model.Event;
-import ru.practicum.explore.participation_request.ParticipationRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
@@ -32,7 +31,7 @@ public class EventController {
                                  @RequestParam(defaultValue = "0") int from,
                                  @RequestParam(defaultValue = "10") int size,
                                  HttpServletRequest request) {
-        log.info("GET-request to find all events with start {} and end {}", rangeStart, rangeEnd);
+        log.info("GET-request to find all events with text = {}; start {}; end: {}", text, rangeStart, rangeEnd);
         return eventService.getEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
     }
 
@@ -42,7 +41,6 @@ public class EventController {
         return eventService.getEventById(eventId, request);
     }
 
-
     @PostMapping("/users/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
     public Event addEvent(@PathVariable long userId,
@@ -50,7 +48,6 @@ public class EventController {
         log.info("POST /users/{}/events with body : {}", userId, eventDto);
         return eventService.addEvent(userId, eventDto);
     }
-
 
     @GetMapping("/users/{userId}/events/{eventId}")
     public Event getEventInfo(@PathVariable long userId,
@@ -87,9 +84,12 @@ public class EventController {
         return eventService.searchEvents(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
-    @GetMapping("/request")
-    public List<ParticipationRequest> getAllRequests() {
-        return eventService.getAllRequests();
+    @GetMapping("/users/{userId}/events")
+    public List<Event> addEvent(@PathVariable long userId,
+                                @RequestParam(defaultValue = "0") int from,
+                                @RequestParam(defaultValue = "10") int size) {
+        log.info("GET user events from userId: {}", userId);
+        return eventService.getUserEvents(userId, from, size);
     }
 
 

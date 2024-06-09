@@ -17,7 +17,6 @@ import ru.practicum.explore.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.location.Location;
 import ru.practicum.explore.location.LocationRepository;
-import ru.practicum.explore.participation_request.ParticipationRequest;
 import ru.practicum.explore.participation_request.ParticipationRequestRepository;
 import ru.practicum.explore.user.UserRepository;
 import ru.practicum.explore.user.model.User;
@@ -144,7 +143,7 @@ public class EventServiceImpl implements EventService {
         ResponseEntity<Object> response = statsClient.getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
 
         log.info(" response = {}", response.getBody());
-String str = Objects.requireNonNull(response.getBody()).toString();
+        String str = Objects.requireNonNull(response.getBody()).toString();
         int index = str.indexOf("hits");
         String subString = str.substring(index);
 
@@ -314,10 +313,13 @@ String str = Objects.requireNonNull(response.getBody()).toString();
         return PageRequest.of(from > 0 ? from / size : 0, size);
     }
 
-
     @Override
-    public List<ParticipationRequest> getAllRequests() {
-        return requestRepository.findAll();
+    public List<Event> getUserEvents(long userId, int from, int size) {
+        if (from < 0 || size <= 0) {
+            throw new RuntimeException("Параметр from не должен быть меньше 1");
+        }
+        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
+        return eventRepository.findEventsByInitiatorId(userId, page);
     }
 
     private List<String> parseStates(String states) {
