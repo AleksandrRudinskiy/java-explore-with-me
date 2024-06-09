@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import ru.practicum.explore.category.CategoryRepository;
 import ru.practicum.explore.category.model.Category;
 import ru.practicum.explore.common.*;
-import ru.practicum.explore.endpoint.StatsClient;
 import ru.practicum.explore.event.dto.EventDto;
 import ru.practicum.explore.event.dto.EventMapper;
 import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
@@ -19,7 +18,6 @@ import ru.practicum.explore.event.stats.EndpointHitMapper;
 import ru.practicum.explore.event.stats.StatsRepository;
 import ru.practicum.explore.location.Location;
 import ru.practicum.explore.location.LocationRepository;
-import ru.practicum.explore.participation_request.ParticipationRequestRepository;
 import ru.practicum.explore.user.UserRepository;
 import ru.practicum.explore.user.model.User;
 import viewstats.ViewStats;
@@ -45,9 +43,6 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
-    private final ParticipationRequestRepository requestRepository;
-    private final StatsClient statsClient;
-
     private final StatsRepository statsRepository;
 
 
@@ -62,13 +57,9 @@ public class EventServiceImpl implements EventService {
                 throw new IncorrectRequestException("Event must be published");
             }
         }
-
         saveStats(request);
-
         PageRequest page = checkPageableParameters(from, size);
-
         List<Event> events = eventRepository.findAll();
-
         if (text != null) {
             events = events.stream()
                     .filter(event -> event.getAnnotation().contains(text) || event.getDescription().contains(text)).collect(Collectors.toList());
@@ -141,22 +132,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public Event getEventById(long eventId, HttpServletRequest request) {
         checkExists(eventId);
-
         saveStats(request);
-
         Event event = eventRepository.findEventById(eventId);
-
-        //ResponseEntity<Object> response = statsClient.getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
-
-        //log.info(" response = {}", response.getBody());
-
-
-        //String data = Objects.requireNonNull(response.getBody()).toString();
-
         List<ViewStats> stats = getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
-
-        // int views = getViews(data);
-
         int views = stats.get(0).getHits();
         event.setViews(views);
         return eventRepository.save(event);
