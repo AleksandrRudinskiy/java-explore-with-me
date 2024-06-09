@@ -118,27 +118,39 @@ public class EventServiceImpl implements EventService {
         log.info("statesList = {}", statesList);
         log.info("usersList = {}", usersList);
         log.info("categoriesList = {}", categoriesList);
+
+        List<Event> events = new ArrayList<>();
+
         if (users == null && states == null && categories == null) {
-            return eventRepository.findAll(page).toList();
+            events.addAll(eventRepository.findAll(page).toList());
+            log.info("searched events =  {}", events);
+            return events;
         }
-        return eventRepository.searchEventsByAdmin(statesList, usersList, categoriesList, page);
+        events.addAll(eventRepository.searchEventsByAdmin(statesList, usersList, categoriesList, page));
+        log.info("searched events =  {}", events);
+        return events;
     }
+
 
     @Override
     public Event getEventInfo(long eventId) {
         return eventRepository.findEventById(eventId);
     }
 
+
     @Override
     public Event getEventById(long eventId, HttpServletRequest request) {
         checkExists(eventId);
         saveStats(request);
+
         Event event = eventRepository.findEventById(eventId);
         List<ViewStats> stats = getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
         int views = stats.get(0).getHits();
         event.setViews(views);
+
         return eventRepository.save(event);
     }
+
 
     @Override
     public Event patchEvent(long eventId, UpdateEventAdminRequest eventRequest) {
@@ -162,6 +174,7 @@ public class EventServiceImpl implements EventService {
         return eventRepository.save(oldEvent);
     }
 
+
     @Override
     public Event patchEventByUser(long userId, long eventId, UpdateEventUserRequest eventRequest) {
         Event oldEvent = eventRepository.findEventById(eventId);
@@ -181,6 +194,7 @@ public class EventServiceImpl implements EventService {
         } else {
             throw new ConflictException("Imposible to modify status of event ");
         }
+        log.info("PATCHED EVENT BY USER : {} ", oldEvent);
         return eventRepository.save(oldEvent);
     }
 
@@ -283,6 +297,7 @@ public class EventServiceImpl implements EventService {
             oldEvent.setTitle(updateEventRequest.getTitle());
         }
     }
+
 
     public List<ViewStats> getStats(String start, String end, String uris, Boolean unique) {
         if (start == null || end == null) {
