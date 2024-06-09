@@ -12,6 +12,7 @@ services:
       - stats-db
 
 
+
   stats-db:
     image: postgres:16.1-alpine
     container_name:
@@ -31,6 +32,7 @@ services:
       - "8080:8080"
     depends_on:
       - main-service-db
+      - stats-server
 
 
   main-service-db:
