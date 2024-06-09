@@ -91,7 +91,6 @@ public class EventServiceImpl implements EventService {
             throw new NotValidEventDateException(
                     "event date and time cannot be earlier than two hours from the current moment");
         }
-
         Location location = locationRepository.save(
                 new Location(0L, eventDto.getLocation().getLat(), eventDto.getLocation().getLon()));
         User initiator = userRepository.findById(userId).get();
@@ -108,7 +107,6 @@ public class EventServiceImpl implements EventService {
         }
         Event event = eventRepository.save(
                 EventMapper.convertToEvent(eventDto, initiator, category, location));
-
         log.info("Added New event: {}", event);
         return event;
     }
@@ -133,7 +131,6 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findEventById(eventId);
     }
 
-
     @Override
     public Event getEventById(long eventId, HttpServletRequest request) {
         checkExists(eventId);
@@ -143,15 +140,20 @@ public class EventServiceImpl implements EventService {
         ResponseEntity<Object> response = statsClient.getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
 
         log.info(" response = {}", response.getBody());
-        String str = Objects.requireNonNull(response.getBody()).toString();
-        int index = str.indexOf("hits");
-        String subString = str.substring(index);
+      //  String data = Objects.requireNonNull(response.getBody()).toString();
+        String data ="";
+        int views = getViews(data);
+        event.setViews(views);
+        return eventRepository.save(event);
+    }
+
+    private int getViews(String data) {
+        int index = data.indexOf("hits");
+        String subString = data.substring(index);
 
         String[] arrayStr = subString.split("=");
         String[] arrayNext = arrayStr[1].split("[,}]");
-        int hits = Integer.parseInt(arrayNext[0]);
-        event.setViews(hits);
-        return eventRepository.save(event);
+        return Integer.parseInt(arrayNext[0]);
     }
 
     @Override
@@ -162,117 +164,53 @@ public class EventServiceImpl implements EventService {
         if (state.equals(State.CANCELED.toString())) {
             throw new ConflictException("Event with id " + eventId + " already " + state);
         }
-
         if (state.equals(State.PENDING.toString()) || !state.equals(State.PUBLISHED.toString())) {
             updateEventRequest(oldEvent, eventRequest);
-
             if (stateAction != null && stateAction.equals(StateAction.PUBLISH_EVENT.toString())) {
                 oldEvent.setState(State.PUBLISHED);
             }
-
             if (stateAction != null && stateAction.equals(StateAction.REJECT_EVENT.toString())) {
                 oldEvent.setState(State.CANCELED);
             }
-
-
         } else {
             throw new ConflictException("Event with id " + eventId + " already " + state);
         }
-
-        Event pachedEvent = eventRepository.save(oldEvent);
-        log.info("Patched event: {}", pachedEvent);
-        return pachedEvent;
+        return eventRepository.save(oldEvent);
     }
-
-    private void updateEventRequest(Event oldEvent, UpdateEventUserRequest updateEventRequest) {
-        if (updateEventRequest.getAnnotation() != null) {
-            oldEvent.setAnnotation(updateEventRequest.getAnnotation());
-        }
-        if (updateEventRequest.getCategoryId() != null) {
-            Category category = categoryRepository.findById(updateEventRequest.getCategoryId()).get();
-            oldEvent.setCategory(category);
-        }
-        if (updateEventRequest.getDescription() != null) {
-            oldEvent.setDescription(updateEventRequest.getDescription());
-        }
-        if (updateEventRequest.getEventDate() != null) {
-            LocalDateTime eventDate = LocalDateTime.parse(updateEventRequest.getEventDate(), formatter);
-            LocalDateTime currentDate = LocalDateTime.now();
-            if (eventDate.isBefore(currentDate)) {
-                throw new NotValidEventDateException("date cannot be in the past");
-            }
-            oldEvent.setEventDate(updateEventRequest.getEventDate());
-        }
-        if (updateEventRequest.getLocation() != null) {
-            Location location = locationRepository.save(new Location(0L, updateEventRequest.getLocation().getLat(), updateEventRequest.getLocation().getLon()));
-            oldEvent.setLocation(location);
-        }
-        if (updateEventRequest.getPaid() != null) {
-            oldEvent.setPaid(updateEventRequest.getPaid());
-        }
-        if (updateEventRequest.getParticipantLimit() != null) {
-            oldEvent.setParticipantLimit(updateEventRequest.getParticipantLimit());
-        }
-        if (updateEventRequest.getRequestModeration() != null) {
-            oldEvent.setRequestModeration(updateEventRequest.getRequestModeration());
-        }
-        if (updateEventRequest.getTitle() != null) {
-            oldEvent.setTitle(updateEventRequest.getTitle());
-        }
-    }
-
 
     @Override
     public Event patchEventByUser(long userId, long eventId, UpdateEventUserRequest eventRequest) {
         Event oldEvent = eventRepository.findEventById(eventId);
         String oldEventState = oldEvent.getState().toString();
         String stateAction = eventRequest.getStateAction();
-
         if (oldEventState.equals(State.CANCELED.toString()) || oldEventState.equals(State.PENDING.toString())) {
-
-
             updateEventRequest(oldEvent, eventRequest);
-
-
-
-
-
             if (eventRequest.getEventDate() != null) {
                 oldEvent.setState(State.valueOf(eventRequest.getStateAction()));
             }
-
             if (stateAction != null && stateAction.equals(StateAction.SEND_TO_REVIEW.toString())) {
                 oldEvent.setState(State.PENDING);
             }
-
             if (stateAction != null && stateAction.equals(StateAction.CANCEL_REVIEW.toString())) {
                 oldEvent.setState(State.CANCELED);
             }
-
         } else {
             throw new ConflictException("Imposible to modify status of event ");
         }
-
-        Event pachedEvent = eventRepository.save(oldEvent);
-        log.info("Patched event: {}", pachedEvent);
-        return pachedEvent;
+        return eventRepository.save(oldEvent);
     }
 
+    @Override
+    public List<Event> getUserEvents(long userId, int from, int size) {
+        PageRequest page = checkPageableParameters(from, size);
+        return eventRepository.findEventsByInitiatorId(userId, page);
+    }
 
     private PageRequest checkPageableParameters(int from, int size) {
         if (from < 0 || size <= 0) {
             throw new RuntimeException("Параметр from не должен быть меньше 1");
         }
         return PageRequest.of(from > 0 ? from / size : 0, size);
-    }
-
-    @Override
-    public List<Event> getUserEvents(long userId, int from, int size) {
-        if (from < 0 || size <= 0) {
-            throw new RuntimeException("Параметр from не должен быть меньше 1");
-        }
-        PageRequest page = PageRequest.of(from > 0 ? from / size : 0, size);
-        return eventRepository.findEventsByInitiatorId(userId, page);
     }
 
     private List<String> parseStates(String states) {
@@ -320,6 +258,43 @@ public class EventServiceImpl implements EventService {
                 || eventRepository.findById(eventId).get().getState().equals(State.PENDING)
                 || eventRepository.findById(eventId).get().getState().equals(State.CANCELED)) {
             throw new NotFoundException("Event with id=" + eventId + " was not found");
+        }
+    }
+
+    private void updateEventRequest(Event oldEvent, UpdateEventUserRequest updateEventRequest) {
+        if (updateEventRequest.getAnnotation() != null) {
+            oldEvent.setAnnotation(updateEventRequest.getAnnotation());
+        }
+        if (updateEventRequest.getCategoryId() != null) {
+            Category category = categoryRepository.findById(updateEventRequest.getCategoryId()).get();
+            oldEvent.setCategory(category);
+        }
+        if (updateEventRequest.getDescription() != null) {
+            oldEvent.setDescription(updateEventRequest.getDescription());
+        }
+        if (updateEventRequest.getEventDate() != null) {
+            LocalDateTime eventDate = LocalDateTime.parse(updateEventRequest.getEventDate(), formatter);
+            LocalDateTime currentDate = LocalDateTime.now();
+            if (eventDate.isBefore(currentDate)) {
+                throw new NotValidEventDateException("date cannot be in the past");
+            }
+            oldEvent.setEventDate(updateEventRequest.getEventDate());
+        }
+        if (updateEventRequest.getLocation() != null) {
+            Location location = locationRepository.save(new Location(0L, updateEventRequest.getLocation().getLat(), updateEventRequest.getLocation().getLon()));
+            oldEvent.setLocation(location);
+        }
+        if (updateEventRequest.getPaid() != null) {
+            oldEvent.setPaid(updateEventRequest.getPaid());
+        }
+        if (updateEventRequest.getParticipantLimit() != null) {
+            oldEvent.setParticipantLimit(updateEventRequest.getParticipantLimit());
+        }
+        if (updateEventRequest.getRequestModeration() != null) {
+            oldEvent.setRequestModeration(updateEventRequest.getRequestModeration());
+        }
+        if (updateEventRequest.getTitle() != null) {
+            oldEvent.setTitle(updateEventRequest.getTitle());
         }
     }
 }
