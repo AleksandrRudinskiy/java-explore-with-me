@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.event.dto.EventDto;
+import ru.practicum.explore.event.dto.EventFullDto;
 import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
 import ru.practicum.explore.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.event.model.Event;
@@ -19,6 +20,20 @@ import java.util.List;
 @Slf4j
 public class EventController {
     private final EventService eventService;
+
+    @GetMapping("/admin/events")
+    public List<EventFullDto> searchEvents(@RequestParam(required = false) String users,
+                                           @RequestParam(required = false) String states,
+                                           @RequestParam(required = false) String categories,
+                                           @RequestParam(required = false) String rangeStart,
+                                           @RequestParam(required = false) String rangeEnd,
+                                           @RequestParam(defaultValue = "0") int from,
+                                           @RequestParam(defaultValue = "10") int size) {
+        log.info("GET/admin/events with params: " +
+                        "users {}, states {},  categories {}, rangeStart {}, rangeEnd {}, from {}, size {} ",
+                users, states, categories, rangeStart, rangeEnd, from, size);
+        return eventService.searchEvents(users, states, categories, rangeStart, rangeEnd, from, size);
+    }
 
     @GetMapping("/events")
     public List<Event> getEvents(@RequestParam(required = false) String text,
@@ -53,20 +68,6 @@ public class EventController {
     public Event getEventInfo(@PathVariable long userId,
                               @PathVariable long eventId) {
         return eventService.getEventInfo(eventId);
-    }
-
-    @GetMapping("/admin/events")
-    public List<Event> searchEvents(@RequestParam(required = false) String users,
-                                    @RequestParam(required = false) String states,
-                                    @RequestParam(required = false) String categories,
-                                    @RequestParam(required = false) String rangeStart,
-                                    @RequestParam(required = false) String rangeEnd,
-                                    @RequestParam(defaultValue = "0") int from,
-                                    @RequestParam(defaultValue = "10") int size) {
-        log.info("GET/admin/events with params: " +
-                        "users {}, states {},  categories {}, rangeStart {}, rangeEnd {}, from {}, size {} ",
-                users, states, categories, rangeStart, rangeEnd, from, size);
-        return eventService.searchEvents(users, states, categories, rangeStart, rangeEnd, from, size);
     }
 
     @PatchMapping("/admin/events/{eventId}")

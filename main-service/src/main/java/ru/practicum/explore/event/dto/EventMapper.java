@@ -1,11 +1,13 @@
 package ru.practicum.explore.event.dto;
 
 import lombok.experimental.UtilityClass;
+import ru.practicum.explore.category.CategoryMapper;
 import ru.practicum.explore.category.model.Category;
 import ru.practicum.explore.common.State;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.location.Location;
 import ru.practicum.explore.location.LocationMapper;
+import ru.practicum.explore.user.UserMapper;
 import ru.practicum.explore.user.model.User;
 
 import java.time.LocalDateTime;
@@ -47,7 +49,28 @@ public class EventMapper {
                 eventDto.getRequestModeration(),
                 State.PENDING,
                 eventDto.getTitle(),
-                0
+                0L
+        );
+    }
+
+    public static EventFullDto convertToEventFullDto(Event event) {
+        return new EventFullDto(
+                event.getId(),
+                event.getAnnotation(),
+                CategoryMapper.convertToCategoryDto(event.getCategory()),
+                event.getConfirmedRequests(),
+                event.getCreatedOn(),
+                event.getDescription(),
+                event.getEventDate(),
+                UserMapper.convertToUserShortDto(event.getInitiator()),
+                event.getLocation(),
+                event.getPaid(),
+                event.getParticipantLimit(),
+                event.getPublishedOn(),
+                event.getRequestModeration(),
+                event.getState(),
+                event.getTitle(),
+                event.getViews()
         );
     }
 }

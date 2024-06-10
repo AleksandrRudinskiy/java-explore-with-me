@@ -1,6 +1,7 @@
 package ru.practicum.explore.event;
 
 import ru.practicum.explore.event.dto.EventDto;
+import ru.practicum.explore.event.dto.EventFullDto;
 import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
 import ru.practicum.explore.event.dto.UpdateEventUserRequest;
 import ru.practicum.explore.event.model.Event;
@@ -16,7 +17,7 @@ public interface EventService {
 
     Event addEvent(long userId, EventDto eventDto);
 
-    List<Event> searchEvents(String users, String states, String categories, String rangeStart, String rangeEnd, int from, int size);
+    List<EventFullDto> searchEvents(String users, String states, String categories, String rangeStart, String rangeEnd, int from, int size);
 
     Event getEventInfo(long eventId);
 

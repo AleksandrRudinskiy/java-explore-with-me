@@ -9,10 +9,7 @@ import ru.practicum.explore.category.CategoryRepository;
 import ru.practicum.explore.category.model.Category;
 import ru.practicum.explore.common.*;
 import ru.practicum.explore.endpoint.StatsClient;
-import ru.practicum.explore.event.dto.EventDto;
-import ru.practicum.explore.event.dto.EventMapper;
-import ru.practicum.explore.event.dto.UpdateEventAdminRequest;
-import ru.practicum.explore.event.dto.UpdateEventUserRequest;
+import ru.practicum.explore.event.dto.*;
 import ru.practicum.explore.event.model.Event;
 import ru.practicum.explore.event.stats.EndpointHit;
 import ru.practicum.explore.event.stats.EndpointHitMapper;
@@ -46,8 +43,45 @@ public class EventServiceImpl implements EventService {
     private final LocationRepository locationRepository;
     private final StatsRepository statsRepository;
 
-    private final StatsClient  statsClient;
+    private final StatsClient statsClient;
 
+    @Override
+    public List<EventFullDto> searchEvents(String users, String states, String categories, String rangeStart, String rangeEnd, int from, int size) {
+        PageRequest page = checkPageableParameters(from, size);
+        List<String> statesList = parseStates(states);
+        List<Long> usersList = parseUsersIds(users);
+        List<Long> categoriesList = parseCategoriesIds(categories);
+        log.info("statesList = {}", statesList);
+        log.info("usersList = {}", usersList);
+        log.info("categoriesList = {}", categoriesList);
+
+        List<Event> events = new ArrayList<>();
+
+        if (users == null && states == null && categories == null) {
+            events.addAll(eventRepository.findAll(page).toList());
+            log.info("searched events =  {}", events);
+            return events.stream()
+                    .map(EventMapper::convertToEventFullDto)
+                    .collect(Collectors.toList());
+        }
+
+        events.addAll(eventRepository.searchEventsByAdmin(statesList, usersList, categoriesList, page));
+        log.info("searched events =  {}", events);
+
+        if (rangeStart != null && rangeEnd != null) {
+            LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
+            LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
+            return events.stream().filter(e -> LocalDateTime.parse(e.getEventDate(), formatter).isAfter(start)
+                            && LocalDateTime.parse(e.getEventDate(), formatter).isBefore(end)).collect(Collectors.toList())
+                    .stream()
+                    .map(EventMapper::convertToEventFullDto)
+                    .collect(Collectors.toList());
+        }
+        log.info("searched events =  {}", events);
+        return events.stream()
+                .map(EventMapper::convertToEventFullDto)
+                .collect(Collectors.toList());
+    }
 
     @Override
     public List<Event> getEvents(
@@ -77,7 +111,7 @@ public class EventServiceImpl implements EventService {
         }
         if (sort != null && sort.equals("VIEWS")) {
             return events.stream()
-                    .sorted(Comparator.comparingInt(Event::getViews)).collect(Collectors.toList());
+                    .sorted(Comparator.comparingLong(Event::getViews)).collect(Collectors.toList());
         }
         return events.stream().limit(size).collect(Collectors.toList());
     }
@@ -113,37 +147,6 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> searchEvents(String users, String states, String categories, String rangeStart, String rangeEnd, int from, int size) {
-        PageRequest page = checkPageableParameters(from, size);
-        List<String> statesList = parseStates(states);
-        List<Long> usersList = parseUsersIds(users);
-        List<Long> categoriesList = parseCategoriesIds(categories);
-        log.info("statesList = {}", statesList);
-        log.info("usersList = {}", usersList);
-        log.info("categoriesList = {}", categoriesList);
-
-        List<Event> events = new ArrayList<>();
-
-        if (users == null && states == null && categories == null) {
-            events.addAll(eventRepository.findAll(page).toList());
-            log.info("searched events =  {}", events);
-            return events;
-        }
-        events.addAll(eventRepository.searchEventsByAdmin(statesList, usersList, categoriesList, page));
-        log.info("searched events =  {}", events);
-
-        if (rangeStart != null && rangeEnd != null) {
-            LocalDateTime start = LocalDateTime.parse(rangeStart, formatter);
-            LocalDateTime end = LocalDateTime.parse(rangeEnd, formatter);
-            return events.stream().filter(e -> LocalDateTime.parse(e.getEventDate(), formatter).isAfter(start)
-                    && LocalDateTime.parse(e.getEventDate(), formatter).isBefore(end)).collect(Collectors.toList());
-        }
-        log.info("searched events =  {}", events);
-        return events;
-    }
-
-
-    @Override
     public Event getEventInfo(long eventId) {
         return eventRepository.findEventById(eventId);
     }
@@ -156,7 +159,7 @@ public class EventServiceImpl implements EventService {
 
         Event event = eventRepository.findEventById(eventId);
         List<ViewStats> stats = getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
-        int views = stats.get(0).getHits();
+        long views = stats.get(0).getHits();
         event.setViews(views);
 
         return eventRepository.save(event);
