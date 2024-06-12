@@ -59,5 +59,4 @@ public class EventCommentController {
         commentService.deleteComment(commentId);
     }
 
-
 }
