@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter;
 
 @UtilityClass
 public class EndpointHitMapper {
-    private final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static EndpointHit convertDtoToEndpointHit(EndpointHitDto endpointHitDto) {
         return new EndpointHit(

@@ -10,12 +10,15 @@ services:
       - "9090:9090"
     depends_on:
       - stats-db
-
+    environment:
+      - SPRING_URL=jdbc:postgresql://stats-db:5432/stats
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
 
   stats-db:
     image: postgres:16.1-alpine
     container_name:
-      "stats_db_container"
+      "stats_db"
     ports:
       - "6542:5432"
     environment:
@@ -23,21 +26,25 @@ services:
       - POSTGRES_USER=user_stats
       - POSTGRES_PASSWORD=password
 
-  main-service:
-    build: main-service
+  emw-service:
+    build: ./main-service/
     image: main-service
     container_name: main_service_container
     ports:
       - "8080:8080"
     depends_on:
-      - main-service-db
+      - main-db
+      - stats-server
     environment:
-      - EXPLOREWITHME_main_service_URL=http://server:8080
+      - SPRING_URL=jdbc:postgresql://localhost:5432/main_service
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SERVICES_STATSSERVICE_URI=http://server:9090
 
-  main-service-db:
+  main-db:
     image: postgres:16.1-alpine
     container_name:
-      "main_service_db_container"
+      "main_service_db"
     ports:
       - "4642:5432"
     environment:

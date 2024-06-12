@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.common.NotCorrectDataException;
 import ru.practicum.explore.endpoint.model.EndpointHitMapper;
-import ru.practicum.explore.viewstats.ViewStats;
+import viewstats.ViewStats;
 
 import javax.transaction.Transactional;
 import java.net.URLDecoder;
@@ -29,13 +29,19 @@ public class StatsServiceImpl implements StatsService {
 
     @Override
     public EndpointHitDto saveEndpointHit(EndpointHitDto endpointHitDto) {
-        endpointHitDto.setTimeStamp(LocalDateTime.now().toString());
+
+        endpointHitDto.setTimeStamp(LocalDateTime.now().format(formatter));
         return EndpointHitMapper.convertToEndpointHitDto(
                 statsRepository.save(EndpointHitMapper.convertDtoToEndpointHit(endpointHitDto)));
     }
 
     @Override
     public List<ViewStats> getStats(String start, String end, String uris, Boolean unique) {
+
+        log.info("STATS method getStats !!!!!!");
+        log.info("start = {}, end = {}, uris = {}, unique = {}", start, end, uris, unique);
+
+
         if (start == null || end == null) {
             throw new NotCorrectDataException("Даты не заданы!");
         }

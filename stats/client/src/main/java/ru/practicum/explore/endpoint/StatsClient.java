@@ -1,4 +1,4 @@
-package ru.practicum;
+package ru.practicum.explore.endpoint;
 
 import endpoint.EndpointHitDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ public class StatsClient extends BaseClient {
     private static final String API_PREFIX = "";
 
     @Autowired
-    public StatsClient(@Value("${stats-server.url}") String serverUrl, RestTemplateBuilder builder) {
+    public StatsClient(@Value("${server.url}") String serverUrl, RestTemplateBuilder builder) {
         super(
                 builder
                         .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl + API_PREFIX))
@@ -28,7 +28,7 @@ public class StatsClient extends BaseClient {
         return post("/hit", endpointHitDto);
     }
 
-    public ResponseEntity<Object> getStats() {
-        return get("/stats");
+    public ResponseEntity<Object> getStats(String start, String end, String uris, Boolean unique) {
+        return get("/stats?start=" + start + "&end=" + end + "&uris=" + uris + "&unique=" + unique);
     }
 }
