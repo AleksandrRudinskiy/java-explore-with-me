@@ -45,7 +45,7 @@ public class EventMapper {
                 location,
                 eventDto.getPaid(),
                 eventDto.getParticipantLimit(),
-                LocalDateTime.now().format(formatter), //должна быть дата опубликования а не СОЗДАНИЯ!
+                LocalDateTime.now().format(formatter),
                 eventDto.getRequestModeration(),
                 State.PENDING,
                 eventDto.getTitle(),
@@ -69,6 +69,21 @@ public class EventMapper {
                 event.getPublishedOn(),
                 event.getRequestModeration(),
                 event.getState(),
+                event.getTitle(),
+                event.getViews()
+        );
+    }
+
+    public EventShortDto convertToEventShortDto(Event event) {
+        return new EventShortDto(
+                event.getId(),
+                event.getDescription(),
+                event.getAnnotation(),
+                CategoryMapper.convertToCategoryDto(event.getCategory()),
+                event.getConfirmedRequests(),
+                event.getEventDate(),
+                UserMapper.convertToUserShortDto(event.getInitiator()),
+                event.getPaid(),
                 event.getTitle(),
                 event.getViews()
         );
