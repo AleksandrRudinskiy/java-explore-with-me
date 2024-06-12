@@ -83,6 +83,7 @@ public class EventServiceImpl implements EventService {
         }
         saveStats(request);
         List<Event> events = eventRepository.findAll();
+        log.info("events = {}", events);
         if (text != null) {
             events = events.stream()
                     .filter(event -> event.getAnnotation().contains(text) || event.getDescription().contains(text)).collect(Collectors.toList());
