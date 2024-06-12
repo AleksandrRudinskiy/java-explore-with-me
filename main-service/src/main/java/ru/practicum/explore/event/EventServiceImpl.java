@@ -4,6 +4,7 @@ import endpoint.EndpointHitDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import ru.practicum.explore.category.CategoryRepository;
 import ru.practicum.explore.category.model.Category;
@@ -11,25 +12,19 @@ import ru.practicum.explore.common.*;
 import ru.practicum.explore.endpoint.StatsClient;
 import ru.practicum.explore.event.dto.*;
 import ru.practicum.explore.event.model.Event;
-import ru.practicum.explore.event.stats.EndpointHit;
-import ru.practicum.explore.event.stats.EndpointHitMapper;
-import ru.practicum.explore.event.stats.StatsRepository;
 import ru.practicum.explore.location.Location;
 import ru.practicum.explore.location.LocationRepository;
 import ru.practicum.explore.user.UserRepository;
 import ru.practicum.explore.user.model.User;
-import viewstats.ViewStats;
 
 import javax.servlet.http.HttpServletRequest;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,8 +36,6 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
-    private final StatsRepository statsRepository;
-
     private final StatsClient statsClient;
 
     @Override
@@ -51,12 +44,7 @@ public class EventServiceImpl implements EventService {
         List<String> statesList = parseStates(states);
         List<Long> usersList = parseUsersIds(users);
         List<Long> categoriesList = parseCategoriesIds(categories);
-        log.info("statesList = {}", statesList);
-        log.info("usersList = {}", usersList);
-        log.info("categoriesList = {}", categoriesList);
-
         List<Event> events = new ArrayList<>();
-
         if (users == null && states == null && categories == null) {
             events.addAll(eventRepository.findAll(page).toList());
             log.info("searched events =  {}", events);
@@ -64,7 +52,6 @@ public class EventServiceImpl implements EventService {
                     .map(EventMapper::convertToEventFullDto)
                     .collect(Collectors.toList());
         }
-
         events.addAll(eventRepository.searchEventsByAdmin(statesList, usersList, categoriesList, page));
         log.info("searched events =  {}", events);
 
@@ -95,7 +82,6 @@ public class EventServiceImpl implements EventService {
             }
         }
         saveStats(request);
-        PageRequest page = checkPageableParameters(from, size);
         List<Event> events = eventRepository.findAll();
         if (text != null) {
             events = events.stream()
@@ -130,7 +116,6 @@ public class EventServiceImpl implements EventService {
                 new Location(0L, eventDto.getLocation().getLat(), eventDto.getLocation().getLon()));
         User initiator = userRepository.findById(userId).get();
         Category category = categoryRepository.findById(eventDto.getCategoryId()).get();
-
         if (eventDto.getPaid() == null) {
             eventDto.setPaid(false);
         }
@@ -140,10 +125,8 @@ public class EventServiceImpl implements EventService {
         if (eventDto.getRequestModeration() == null) {
             eventDto.setRequestModeration(true);
         }
-        Event event = eventRepository.save(
+        return eventRepository.save(
                 EventMapper.convertToEvent(eventDto, initiator, category, location));
-        log.info("Added New event: {}", event);
-        return event;
     }
 
     @Override
@@ -156,12 +139,15 @@ public class EventServiceImpl implements EventService {
     public Event getEventById(long eventId, HttpServletRequest request) {
         checkExists(eventId);
         saveStats(request);
-
         Event event = eventRepository.findEventById(eventId);
-        List<ViewStats> stats = getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
-        long views = stats.get(0).getHits();
+        ResponseEntity<Object> response = statsClient.getStats("2020-01-01 00:00:00", "2035-01-01 00:00:00", request.getRequestURI(), true);
+        String viewStatsStr = Objects.requireNonNull(response.getBody()).toString();
+        int index = viewStatsStr.indexOf("hits");
+        String subString = viewStatsStr.substring(index);
+        String[] arrayStr = subString.split("=");
+        String[] arrayNext = arrayStr[1].split("[,}]");
+        long views = Long.parseLong(arrayNext[0]);
         event.setViews(views);
-
         return eventRepository.save(event);
     }
 
@@ -187,7 +173,6 @@ public class EventServiceImpl implements EventService {
         }
         return eventRepository.save(oldEvent);
     }
-
 
     @Override
     public Event patchEventByUser(long userId, long eventId, UpdateEventUserRequest eventRequest) {
@@ -262,9 +247,6 @@ public class EventServiceImpl implements EventService {
                 request.getRequestURI(),
                 request.getRemoteAddr(),
                 LocalDateTime.now().format(formatter));
-        EndpointHit endpointHit = EndpointHitMapper.convertDtoToEndpointHit(endpointHitDto);
-
-        statsRepository.save(endpointHit);
         statsClient.saveEndpointHit(endpointHitDto);
     }
 
@@ -310,39 +292,6 @@ public class EventServiceImpl implements EventService {
         }
         if (updateEventRequest.getTitle() != null) {
             oldEvent.setTitle(updateEventRequest.getTitle());
-        }
-    }
-
-
-    public List<ViewStats> getStats(String start, String end, String uris, Boolean unique) {
-        if (start == null || end == null) {
-            throw new NotCorrectDataException("Даты не заданы!");
-        }
-        LocalDateTime startDate = LocalDateTime.parse(start, formatter);
-        LocalDateTime endDate = LocalDateTime.parse(end, formatter);
-        if (endDate.isBefore(startDate)) {
-            throw new NotCorrectDataException("Неверно заданы даты!");
-        }
-
-        if (uris.equals("%events%")) {
-            return statsRepository.getStats(uris, start, end);
-        }
-
-        String decodeUris = URLDecoder.decode(uris, StandardCharsets.UTF_8);
-        String[] arrayUris = decodeUris.split(",");
-
-        if (unique) {
-            List<ViewStats> stats = new ArrayList<>();
-            Arrays.stream(arrayUris).forEach(s -> stats.addAll(statsRepository.getStatsUniqueIp(s, start, end)));
-            return stats.stream()
-                    .sorted(Comparator.comparingInt(ViewStats::getHits).reversed())
-                    .collect(Collectors.toList());
-        } else {
-            List<ViewStats> stats = new ArrayList<>();
-            Arrays.stream(arrayUris).forEach(s -> stats.addAll(statsRepository.getStats(s, start, end)));
-            return stats.stream()
-                    .sorted(Comparator.comparingInt(ViewStats::getHits).reversed())
-                    .collect(Collectors.toList());
         }
     }
 

@@ -36,7 +36,7 @@ services:
       - main-db
       - stats-server
     environment:
-
+      - SPRING_URL=jdbc:postgresql://localhost:5432/main_service
       - SPRING_DATASOURCE_USERNAME=user
       - SPRING_DATASOURCE_PASSWORD=password
       - SERVICES_STATSSERVICE_URI=http://server:9090
