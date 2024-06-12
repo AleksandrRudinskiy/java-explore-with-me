@@ -71,7 +71,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> getEvents(
+    public List<EventFullDto> getEvents(
             String text, String categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable,
             String sort, int from, int size, HttpServletRequest request) {
         if (rangeStart != null && rangeEnd != null) {
@@ -95,15 +95,22 @@ public class EventServiceImpl implements EventService {
         if (sort != null && sort.equals("EVENT_DATE")) {
             log.info("events = {}", events);
             return events.stream()
-                    .sorted(Comparator.comparing(Event::getEventDate)).collect(Collectors.toList());
+                    .sorted(Comparator.comparing(Event::getEventDate))
+                    .map(EventMapper::convertToEventFullDto)
+                    .collect(Collectors.toList());
         }
         if (sort != null && sort.equals("VIEWS")) {
             log.info("events = {}", events);
             return events.stream()
-                    .sorted(Comparator.comparingLong(Event::getViews)).collect(Collectors.toList());
+                    .sorted(Comparator.comparingLong(Event::getViews))
+                    .map(EventMapper::convertToEventFullDto)
+                    .collect(Collectors.toList());
         }
         log.info("events = {}", events);
-        return events.stream().limit(size).collect(Collectors.toList());
+        return events.stream()
+                .map(EventMapper::convertToEventFullDto)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     @Override
