@@ -2,6 +2,7 @@ package ru.practicum.explore.comment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.explore.comment.dto.EventCommentDto;
 
@@ -15,6 +16,7 @@ public class EventCommentController {
     private final EventCommentService commentService;
 
     @PostMapping("/event/{eventId}/user/{commenterId}/comments")
+    @ResponseStatus(HttpStatus.CREATED)
     public EventCommentDto addComment(@PathVariable long eventId,
                                       @PathVariable long commenterId,
                                       @RequestBody @Valid EventCommentDto eventCommentDto) {
@@ -31,7 +33,7 @@ public class EventCommentController {
 
     @PatchMapping("/comments/{commentId}/admin")
     public EventCommentDto patchCommentStateByAdmin(@PathVariable long commentId,
-                                                    @RequestBody @Valid EventCommentDto eventCommentDto) {
+                                                    @RequestBody EventCommentDto eventCommentDto) {
         log.info("PATCH /comments/{}", commentId);
         return commentService.patchCommentStateByAdmin(commentId, eventCommentDto);
     }
