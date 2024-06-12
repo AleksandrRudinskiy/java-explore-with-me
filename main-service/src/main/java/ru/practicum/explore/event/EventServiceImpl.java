@@ -92,13 +92,16 @@ public class EventServiceImpl implements EventService {
                     .filter(Event::getPaid).collect(Collectors.toList());
         }
         if (sort != null && sort.equals("EVENT_DATE")) {
+            log.info("events = {}", events);
             return events.stream()
                     .sorted(Comparator.comparing(Event::getEventDate)).collect(Collectors.toList());
         }
         if (sort != null && sort.equals("VIEWS")) {
+            log.info("events = {}", events);
             return events.stream()
                     .sorted(Comparator.comparingLong(Event::getViews)).collect(Collectors.toList());
         }
+        log.info("events = {}", events);
         return events.stream().limit(size).collect(Collectors.toList());
     }
 
