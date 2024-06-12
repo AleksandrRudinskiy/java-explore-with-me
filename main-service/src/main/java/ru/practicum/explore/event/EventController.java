@@ -36,7 +36,7 @@ public class EventController {
     }
 
     @GetMapping("/events")
-    public List<Event> getEvents(@RequestParam(required = false) String text,
+    public List<EventFullDto> getEvents(@RequestParam(required = false) String text,
                                  @RequestParam(required = false) String categories,
                                  @RequestParam(required = false) Boolean paid,
                                  @RequestParam(required = false) String rangeStart,
