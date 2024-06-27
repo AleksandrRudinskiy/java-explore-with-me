@@ -71,7 +71,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<Event> getEvents(
+    public List<EventFullDto> getEvents(
             String text, String categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable,
             String sort, int from, int size, HttpServletRequest request) {
         if (rangeStart != null && rangeEnd != null) {
@@ -83,23 +83,36 @@ public class EventServiceImpl implements EventService {
         }
         saveStats(request);
         List<Event> events = eventRepository.findAll();
+        log.info("events = {}", events);
         if (text != null) {
             events = events.stream()
                     .filter(event -> event.getAnnotation().contains(text) || event.getDescription().contains(text)).collect(Collectors.toList());
         }
         if (paid != null && paid) {
+            log.info("events = {}", events);
             events = events.stream()
-                    .filter(Event::getPaid).collect(Collectors.toList());
+                    .filter(Event::getPaid)
+                    .collect(Collectors.toList());
         }
         if (sort != null && sort.equals("EVENT_DATE")) {
+            log.info("events = {}", events);
             return events.stream()
-                    .sorted(Comparator.comparing(Event::getEventDate)).collect(Collectors.toList());
+                    .sorted(Comparator.comparing(Event::getEventDate))
+                    .map(EventMapper::convertToEventFullDto)
+                    .collect(Collectors.toList());
         }
         if (sort != null && sort.equals("VIEWS")) {
+            log.info("events = {}", events);
             return events.stream()
-                    .sorted(Comparator.comparingLong(Event::getViews)).collect(Collectors.toList());
+                    .sorted(Comparator.comparingLong(Event::getViews))
+                    .map(EventMapper::convertToEventFullDto)
+                    .collect(Collectors.toList());
         }
-        return events.stream().limit(size).collect(Collectors.toList());
+        log.info("events = {}", events);
+        return events.stream()
+                .map(EventMapper::convertToEventFullDto)
+                .limit(size)
+                .collect(Collectors.toList());
     }
 
     @Override
